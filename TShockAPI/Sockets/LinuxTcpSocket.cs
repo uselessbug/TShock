@@ -78,7 +78,31 @@ namespace TShockAPI.Sockets
 
 		bool ISocket.IsConnected()
 		{
-			return this._connection != null && this._connection.Client != null && this._connection.Connected;
+			try
+			{
+				if (this._connection == null || this._connection.Client == null || !this._connection.Connected)
+				{
+					return false;
+				}
+
+				Socket socket = this._connection.Client;
+				if (socket.Poll(0, SelectMode.SelectRead) && socket.Available == 0)
+				{
+					((ISocket)this).Close();
+					return false;
+				}
+
+				return true;
+			}
+			catch (SocketException)
+			{
+				((ISocket)this).Close();
+				return false;
+			}
+			catch (ObjectDisposedException)
+			{
+				return false;
+			}
 		}
 
 		void ISocket.Connect(RemoteAddress address)
