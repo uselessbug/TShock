@@ -94,7 +94,14 @@ namespace TShockAPI.Sockets
 
 			try
 			{
-				tuple.Item1(tuple.Item2, this._connection.GetStream().EndRead(result));
+				int bytesRead = this._connection.GetStream().EndRead(result);
+				if (bytesRead == 0)
+				{
+					((ISocket)this).Close();
+					return;
+				}
+
+				tuple.Item1(tuple.Item2, bytesRead);
 			}
 			catch (InvalidOperationException)
 			{
