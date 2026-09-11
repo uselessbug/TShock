@@ -2,4 +2,4 @@
 	path = TerrariaServerAPI
 	url = https://github.com/uselessbug/TSAPI.git
 	ignore = dirty
-	branch = fix/1458-connection-listener
+	branch = general-devel
