@@ -41,6 +41,7 @@ namespace TShockAPI
 		internal Handlers.EmojiHandler EmojiHandler { get; private set; }
 		internal Handlers.IllegalPerSe.EmojiPlayerMismatch EmojiPlayerMismatch { get; private set; }
 		internal Handlers.DisplayDollItemSyncHandler DisplayDollItemSyncHandler { get; private set; }
+		internal Handlers.DisplayDollPoseSyncHandler DisplayDollPoseSyncHandler { get; private set; }
 		internal Handlers.RequestTileEntityInteractionHandler RequestTileEntityInteractionHandler { get; private set; }
 		internal Handlers.LandGolfBallInCupHandler LandGolfBallInCupHandler { get; private set; }
 		internal Handlers.SyncTilePickingHandler SyncTilePickingHandler { get; private set; }
@@ -98,6 +99,9 @@ namespace TShockAPI
 
 			DisplayDollItemSyncHandler = new Handlers.DisplayDollItemSyncHandler();
 			GetDataHandlers.DisplayDollItemSync += DisplayDollItemSyncHandler.OnReceive;
+
+			DisplayDollPoseSyncHandler = new Handlers.DisplayDollPoseSyncHandler();
+			GetDataHandlers.DisplayDollPoseSync += DisplayDollPoseSyncHandler.OnReceive;
 
 			RequestTileEntityInteractionHandler = new Handlers.RequestTileEntityInteractionHandler();
 			GetDataHandlers.RequestTileEntityInteraction += RequestTileEntityInteractionHandler.OnReceive;
@@ -792,11 +796,12 @@ namespace TShockAPI
 					         args.Player.TPlayer.mount.Type != MountID.Drill &&
 					         args.Player.TPlayer.mount.Type != MountID.DiggingMoleMinecart)
 					{
-						if (args.Player.TPlayer.ownedProjectileCounts[ProjectileID.PalworldDigtoise] > 0)
+						if (args.Player.TPlayer.ownedProjectileCounts[ProjectileID.PalworldDigtoise] > 0
+							|| args.Player.TPlayer.ownedProjectileCounts[ProjectileID.PalworldTrustyDigtoise] > 0)
 						{
 							var digtoiseProjectile = Main.projectile
 								.FirstOrDefault(p =>
-									p is { active: true, type: ProjectileID.PalworldDigtoise } && p.owner == args.Player.Index);
+									p is { active: true, type: ProjectileID.PalworldDigtoise or ProjectileID.PalworldTrustyDigtoise } && p.owner == args.Player.Index );
 
 							// Digtoise starts digging
 							if (digtoiseProjectile?.ai[0] is 1f or 2f or 3f
@@ -1551,7 +1556,9 @@ namespace TShockAPI
 				|| type == ProjectileID.StickyDynamite
 				|| type == ProjectileID.BombFish
 				|| type == ProjectileID.ScarabBomb
-				|| type == ProjectileID.DirtBomb))
+				|| type == ProjectileID.DirtBomb
+				|| type == ProjectileID.SuperBomb
+				|| type == ProjectileID.SuperStickyBomb))
 			{
 				//  Denotes that the player has recently set a fuse - used for cheat detection.
 				args.Player.RecentFuse = 10;
@@ -3258,6 +3265,11 @@ namespace TShockAPI
 			{ BuffID.Tipsy, 3659 },
 			{ BuffID.Lovestruck, 1800 },
 			{ BuffID.GelBalloonBuff, 1800 },
+			{ BuffID.PotentAcid, 120 },
+			{ BuffID.ChlorophyteSpore, 300 },
+			{ BuffID.AcceleratePoisons, 300 },
+			{ BuffID.BlueLightning, 420 },
+			{ BuffID.RedLightning, 420 },
 		};
 
 		/// <summary>
