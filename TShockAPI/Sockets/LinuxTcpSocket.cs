@@ -78,7 +78,24 @@ namespace TShockAPI.Sockets
 
 		bool ISocket.IsConnected()
 		{
-			return this._connection != null && this._connection.Client != null && this._connection.Connected;
+			if (this._connection == null || this._connection.Client == null || !this._connection.Connected)
+			{
+				return false;
+		}
+
+			try
+			{
+				Socket socket = this._connection.Client;
+				return !socket.Poll(0, SelectMode.SelectRead) || socket.Available != 0;
+			}
+			catch (SocketException)
+			{
+				return false;
+			}
+			catch (ObjectDisposedException)
+			{
+				return false;
+			}
 		}
 
 		void ISocket.Connect(RemoteAddress address)
@@ -96,14 +113,10 @@ namespace TShockAPI.Sockets
 			{
 				tuple.Item1(tuple.Item2, this._connection.GetStream().EndRead(result));
 			}
-			catch (InvalidOperationException)
+			catch (Exception)
 			{
-				// This is common behaviour during client disconnects
 				((ISocket)this).Close();
-			}
-			catch (Exception ex)
-			{
-				TShock.Log.Error(ex.ToString());
+				tuple.Item1(tuple.Item2, 0);
 			}
 		}
 
